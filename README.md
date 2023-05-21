@@ -1,192 +1,311 @@
-<br />
-<p align="center">
-  <a href="https://semgrep.dev">
-    <picture>
-      <source media="(prefers-color-scheme: light)" srcset="images/semgrep-logo-light.svg">
-      <source media="(prefers-color-scheme: dark)" srcset="images/semgrep-logo-dark.svg">
-      <img src="https://raw.githubusercontent.com/returntocorp/semgrep/develop/images/semgrep-logo-light.svg" height="100" alt="Semgrep logo"/>
-    </picture>
-  </a>
-</p>
-<h2 align="center">
-  Code scanning at ludicrous speed.
-</h2>
-<p align="center">
-  <a href="https://formulae.brew.sh/formula/semgrep">
-    <img src="https://img.shields.io/homebrew/v/semgrep?style=flat-square" alt="Homebrew" />
-  </a>
-  <a href="https://pypi.org/project/semgrep/">
-    <img alt="PyPI" src="https://img.shields.io/pypi/v/semgrep?style=flat-square&color=blue">
-  </a>
-  <a href="https://semgrep.dev/docs/">
-      <img src="https://img.shields.io/badge/docs-semgrep.dev-purple?style=flat-square" alt="Documentation" />
-  </a>
-  <a href="https://go.semgrep.dev/slack">
-    <img src="https://img.shields.io/badge/slack-1.9k%20members-green?style=flat-square" alt="Join Semgrep community Slack" />
-  </a>
-  <a href="https://github.com/returntocorp/semgrep/issues/new/choose">
-    <img src="https://img.shields.io/badge/issues-welcome-green?style=flat-square" alt="Issues welcome!" />
-  </a>
-  <a href="https://github.com/returntocorp/semgrep#readme">
-    <img src="https://img.shields.io/github/stars/returntocorp/semgrep?label=GitHub%20Stars&style=flat-square" alt="Star Semgrep on GitHub" />
-  </a>
-  <a href="https://hub.docker.com/r/returntocorp/semgrep">
-    <img src="https://img.shields.io/docker/pulls/returntocorp/semgrep.svg?style=flat-square" alt="Docker Pulls" />
-  </a>
-  <a href="https://twitter.com/intent/follow?screen_name=semgrep">
-    <img src="https://img.shields.io/twitter/follow/semgrep?label=Follow%20semgrep&style=social&color=blue" alt="Follow @semgrep on Twitter" />
-  </a>
-</p>
-</br>
 
-Semgrep is a fast, open-source, static analysis engine for finding bugs, detecting vulnerabilities in third-party dependencies, and enforcing code standards. Semgrep analyzes code locally on your computer or in your build environment: **code is never uploaded**. [Get started →.](#getting-started-)
+# Semgrep Contributions
 
-<a href="#option-1-getting-started-from-the-cli">
-<img src="https://raw.githubusercontent.com/returntocorp/semgrep/develop/images/semgrep-scan-cli.jpg" alt="Semgrep CLI image"/></a>
+With motivatation from the DevOps course at KTH. First non-trivial proposed contribution to a major project I've used in the past.
 
-### Language support
+Main Repo:
+https://github.com/returntocorp/semgrep/
+Forked Repo:
+https://github.com/allandao/semgrep
+Pull Request (username allandao):
+https://github.com/returntocorp/semgrep/pull/7850
 
-Semgrep supports 30+ languages.
+Other (small contributions) from open source exploration while investigating potential issues to fix:
+https://github.com/actions/runner-images/pull/7438 - merged PR on major project (for a typo)
+https://github.com/Azure/azure-powershell/issues/20817 - clear out issue backlog
 
-| Category     | Languages                                                                                                                                                                     |
-| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GA           | C# · Go · Java · JavaScript · JSX · JSON · PHP · Python · Ruby · Scala · Terraform · TypeScript · TSX                                                                         |
-| Beta         | Kotlin · Rust                                                                                                                                                                 |
-| Experimental | Bash · C · C++ · Clojure · Dart · Dockerfile · Elixir · HTML · Julia · Jsonnet · Lisp · Lua · OCaml · R · Scheme · Solidity · Swift · YAML · XML · Generic (ERB, Jinja, etc.) |
+## Context
 
-### Getting started 🚀
+I wanted to contribute to Semgrep by tackling these issues to gain a better understanding of the codebase:
 
-1. [From the CLI](#option-1-getting-started-from-the-cli)
-2. [From the Semgrep Cloud Platform](#option-2-getting-started-from-the-semgrep-cloud-platform-recommended)
+- Semgrep didn't scan and returns zero exit code if you use space character in config -
+https://github.com/returntocorp/semgrep/issues/7630
+- --error should explain why the exit status is nonzero - https://github.com/returntocorp/semgrep/issues/7661
 
-For beginners, we recommend starting with the [Semgrep Cloud Platform](#option-2-getting-started-from-the-semgrep-cloud-platform-recommended) because it provides a visual interface, a demo project, result triaging and exploration workflows, and makes setup in CI/CD fast. Scans are still local and code isn't uploaded. Alternatively, you can also start with the CLI without logging in and navigate the terminal output to run one-off searches.
+These issues were related to the semgrep ci command, which adds a layer of complexity and is unrelated to my goal of contributing to the basic semgrep cli commands.
 
-### Option 1: Getting started from the CLI
+While investigating these issues and the codebase to better understand Sempgrep, I started to notice that some summary messages had "files" consistently plural, while others did not. I wanted to investigate the reason why.
 
-1.  Install Semgrep CLI
+## Examples
+
+### Correct
+```
+┌─────────────┐
+│ Scan Status │
+└─────────────┘
+  Scanning 1 file tracked by git with 1073 Code rules:
+┌────────────────┐
+│ 1 Code Finding │
+└────────────────┘
+┌─────────────────┐
+│ 2 Code Findings │
+└─────────────────┘
+Ran 1073 rules on 1 file: 0 findings.
 
 ```
-# For macOS
-$ brew install semgrep
 
-# For Ubuntu/WSL/Linux/macOS
-$ python3 -m pip install semgrep
+### Incorrect
+```
+┌──────────────┐
+│ Scan Summary │
+└──────────────┘
+Some files were skipped or only partially analyzed.
+  Partially scanned: 1 files only partially analyzed due to parsing or internal Semgrep errors
+  Scan skipped: 1 files matching .semgrepignore patterns
 
-# To try Semgrep without installation run via Docker
-$ docker run --rm -v "${PWD}:/src" returntocorp/semgrep semgrep
 ```
 
-2.  Go to your app's root directory and run `semgrep scan --config auto`. This will scan your project with the default settings.
+-----
 
-3.  [Optional, but recommended] Run `semgrep login` to get the login URL for the Semgrep Cloud Platform. Open the login URL in the browser and login.
+## Investigation
+With this comparison, I could focus on the differences on "Scan Status" and "Code Finding(s)" outputs compared to "Scan Summary" outputs. 
 
-### Option 2: Getting started from the Semgrep Cloud Platform (Recommended)
+Searching for Partially scanned: and Scan skipped: revealed that this output is directly from OCaml code. The file of interest is [Summary_report.ml](https://github.com/returntocorp/semgrep/blob/d1103fe8aa9dfee140bb4214b3f9ebab1d2a4d4c/src/osemgrep/reporting/Summary_report.ml#L62) and the relevant code: 
 
-<a href="https://go.semgrep.dev/login-ghrmgo"  target="_blank"><img src="https://raw.githubusercontent.com/returntocorp/semgrep/develop/images/semgrep-main-image.jpg" alt="Semgrep platform image"/> </a>
-
-1.  Register to <a href="https://go.semgrep.dev/login-ghrmgo" target="_blank">semgrep.dev</a>
-
-2.  Explore the demo app
-
-3.  Scan your project by navigating to `Projects > Scan New Project > Run scan in CI`
-
-4.  Select your version control system and follow the wizard to add your project. After this setup, Semgrep will scan your project after every pull request.
-
-5.  [Optional but recommended] If you want to run Semgrep locally, follow the steps in the CLI section.
-
-### Notes:
-
-1.  Visit [Docs > Running rules](https://semgrep.dev/docs/running-rules/) to learn more about `auto` config and other rules.
-
-2.  If there are any issues, please ask in the Smegrep Slack group <a href="https://go.semgrep.dev/slack" target="_blank"> https://go.semgrep.dev/slack</a>
-
-3.  To run Semgrep Supply Chain, [contact the Semgrep team](https://semgrep.dev/contact-us).
-    Visit the [full documentation](https://semgrep.dev/docs/getting-started/) to learn more.
-
-### Semgrep Ecosystem
-
-The Semgrep ecosystem includes the following products:
-
-- Semgrep OSS Engine - The open-source engine at the heart of everything (this project).
-- [Semgrep Cloud Platform (SCP)](https://semgrep.dev/login) - Deploy, manage, and monitor SAST and SCA at scale using Semgrep, with [free and paid tiers](https://semgrep.dev/pricing). Integrates with continuous integration (CI) providers such as GitHub, GitLab, CircleCI, and more.
-- [Semgrep Code](https://semgrep.dev/products/semgrep-code) - Scan your code with Semgrep's Pro rules and Semgrep Pro Engine to find OWASP Top 10 vulnerabilities and protect against critical security risks specific to your organization. Semgrep Code provides both Community (free) and Team (paid) tiers.
-- [Semgrep Supply Chain (SSC)](https://semgrep.dev/products/semgrep-supply-chain) - A high-signal dependency scanner that detects reachable vulnerabilities in open source third-party libraries and functions across the software development life cycle (SDLC). Semgrep Supply Chain is available on Team (paid) tiers.
-
-and:
-
-- [Semgrep Playground](https://semgrep.dev/editor) - An online interactive tool for writing and sharing rules.
-- [Semgrep Registry](https://semgrep.dev/explore) - 2,000+ community-driven rules covering security, correctness, and dependency vulnerabilities.
-
-Join hundreds of thousands of other developers and security engineers already using Semgrep at companies like GitLab, Dropbox, Slack, Figma, Shopify, HashiCorp, Snowflake, and Trail of Bits.
-
-Semgrep is developed and commercially supported by [Semgrep, Inc., a software security company](https://semgrep.dev).
-
-### Semgrep Rules
-
-Semgrep rules look like the code you already write; no abstract syntax trees, regex wrestling, or painful DSLs. Here's a quick rule for finding Python `print()` statements.
-
-Run it online in Semgrep’s Playground by [clicking here](https://semgrep.dev/s/ievans:print-to-logger).
-
-<p align="center">
-    <a href="https://semgrep.dev/s/ievans:print-to-logger"  target="_blank"><img src="https://raw.githubusercontent.com/returntocorp/semgrep/develop/images/semgrep-example-rules-editor.jpg" width="582" alt="Semgrep rule example for finding Python print() statements" /></a>
-</p>
-
-#### Examples
-
-Visit [Docs > Rule examples](https://semgrep.dev/docs/writing-rules/rule-ideas/) for use cases and ideas.
-
-| Use case                          | Semgrep rule                                                                                                                                                                                                                                                                                                                                           |
-| :-------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Ban dangerous APIs                | [Prevent use of exec](https://semgrep.dev/s/clintgibler:no-exec)                                                                                                                                                                                                                                                                                       |
-| Search routes and authentication  | [Extract Spring routes](https://semgrep.dev/s/clintgibler:spring-routes)                                                                                                                                                                                                                                                                               |
-| Enforce the use secure defaults   | [Securely set Flask cookies](https://semgrep.dev/s/dlukeomalley:flask-set-cookie)                                                                                                                                                                                                                                                                      |
-| Tainted data flowing into sinks   | [ExpressJS dataflow into sandbox.run](https://semgrep.dev/s/ievans:simple-taint-dataflow)                                                                                                                                                                                                                                                              |
-| Enforce project best-practices    | [Use assertEqual for == checks](https://semgrep.dev/s/dlukeomalley:use-assertEqual-for-equality), [Always check subprocess calls](https://semgrep.dev/s/dlukeomalley:unchecked-subprocess-call)                                                                                                                                                        |
-| Codify project-specific knowledge | [Verify transactions before making them](https://semgrep.dev/s/dlukeomalley:verify-before-make)                                                                                                                                                                                                                                                        |
-| Audit security hotspots           | [Finding XSS in Apache Airflow](https://semgrep.dev/s/ievans:airflow-xss), [Hardcoded credentials](https://semgrep.dev/s/dlukeomalley:hardcoded-credentials)                                                                                                                                                                                           |
-| Audit configuration files         | [Find S3 ARN uses](https://semgrep.dev/s/dlukeomalley:s3-arn-use)                                                                                                                                                                                                                                                                                      |
-| Migrate from deprecated APIs      | [DES is deprecated](https://semgrep.dev/editor?registry=java.lang.security.audit.crypto.des-is-deprecated), [Deprecated Flask APIs](https://semgrep.dev/editor?registry=python.flask.maintainability.deprecated.deprecated-apis), [Deprecated Bokeh APIs](https://semgrep.dev/editor?registry=python.bokeh.maintainability.deprecated.deprecated_apis) |
-| Apply automatic fixes             | [Use listenAndServeTLS](https://semgrep.dev/s/clintgibler:use-listenAndServeTLS)                                                                                                                                                                                                                                                                       |
-
-### Extensions
-
-Visit [Docs > Extensions](https://semgrep.dev/docs/extensions/) to learn about using Semgrep in your editor or pre-commit. When integrated into CI and configured to scan pull requests, Semgrep will only report issues introduced by that pull request; this lets you start using Semgrep without fixing or ignoring pre-existing issues!
-
-### Documentation
-
-Browse the full Semgrep [documentation on the website](https://semgrep.dev/docs). If you’re new to Semgrep, check out [Docs > Getting started](https://semgrep.dev/docs/getting-started/) or the [interactive tutorial](https://semgrep.dev/learn).
-
-### Metrics
-
-Using remote configuration from the [Registry](https://semgrep.dev/r) (like `--config=p/ci`) reports pseudonymous rule metrics to semgrep.dev.
-
-Using configs from local files (like `--config=xyz.yml`) does **not** enable metrics.
-
-To disable Registry rule metrics, use `--metrics=off`.
-
-The Semgrep [privacy policy](https://semgrep.dev/docs/metrics) describes the principles that guide data-collection decisions and the breakdown of the data that are and are not collected when the metrics are enabled.
-
-### More
-
-- [Frequently asked questions (FAQs)](https://semgrep.dev/docs/faq/)
-- [Contributing](https://semgrep.dev/docs/contributing/contributing/)
-- [Build instructions for developers](INSTALL.md)
-- [Ask questions in the Semgrep community Slack](https://go.semgrep.dev/slack)
-- [CLI reference and exit codes](https://semgrep.dev/docs/cli-usage)
-- [Semgrep YouTube channel](https://www.youtube.com/c/semgrep)
-- [License (LGPL-2.1)](LICENSE)
-
-### Upgrading
-
-To upgrade, run the command below associated with how you installed Semgrep:
-
-```sh
-# Using Homebrew
-$ brew upgrade semgrep
-
-# Using pip
-$ python3 -m pip install --upgrade semgrep
-
-# Using Docker
-$ docker pull returntocorp/semgrep:latest
+```ocaml
+let opt_msg msg = function
+    | [] -> None
+    | xs -> Some (string_of_int (List.length xs) ^ " " ^ msg)
+  in
+  let out_skipped =
+    let mb = string_of_int Stdlib.(max_target_bytes / 1000 / 1000) in
+    Common.map_filter Fun.id
+      [
+        opt_msg "files not matching --include patterns" include_ignored;
+        opt_msg "files matching --exclude patterns" exclude_ignored;
+        opt_msg ("files larger than " ^ mb ^ " MB") file_size_ignored;
+        opt_msg "files matching .semgrepignore patterns" semgrep_ignored;
+        (if legacy then None else opt_msg "other files ignored" other_ignored);
+      ]
+  in
+  let out_partial =
+    opt_msg
+      "files only partially analyzed due to a parsing or internal Semgrep error"
+      errors
+  in
+  match (out_skipped, out_partial) with
+  | [], None -> ()
+  | xs, parts ->
+      (* TODO if limited_fragments:
+              for fragment in limited_fragments:
+                  message += f"\n  {fragment}" *)
+      Fmt.pf ppf "Some files were skipped or only partially analyzed.@.";
+      Option.iter (fun txt -> Fmt.pf ppf "  Partially scanned: %s@." txt) parts;
+      (match xs with
+      | [] -> ()
+      | xs ->
+          Fmt.pf ppf "  Scan skipped: %s@." (String.concat ", " xs);
+          Fmt.pf ppf
+            "  For a full list of skipped files, run semgrep with the \
+             --verbose flag.@.");
+      Fmt.pf ppf "@."
 ```
+
+Great, we found the location of the OCaml code responsible for the output. So why do we have passing examples? I took "tracked by git" as inspiration for correct output, revealing the following items of interest:
+- [sempgrep-main.py](https://github.com/returntocorp/semgrep/blob/d1103fe8aa9dfee140bb4214b3f9ebab1d2a4d4c/cli/src/semgrep/semgrep_main.py#L156)
+- [Status_report.ml](https://github.com/returntocorp/semgrep/blob/d1103fe8aa9dfee140bb4214b3f9ebab1d2a4d4c/src/osemgrep/reporting/Status_report.ml#L15)
+
+Here, there is a connection between the Python wrapper and Semgrep core. In particular, notice
+```py
+def print_summary_line(
+    # ... 
+    # From sepgrep-main.py
+    # ...
+    # Aha, noticed unit_str() call!
+    # from semgrep.util import unit_str
+    summary_line = f"Scanning {unit_str(file_count, 'file')}"
+```
+
+Looking into [util.py](https://github.com/returntocorp/semgrep/blob/d1103fe8aa9dfee140bb4214b3f9ebab1d2a4d4c/cli/src/semgrep/util.py#L182), we find that there unit_str is already conveniently created to handle plurality for words such as file in output messages.
+```py
+def unit_str(count: int, unit: str, pad: bool = False) -> str:
+    if count != 1:
+        unit += "s"
+    elif pad:
+        unit += " "
+
+    return f"{count} {unit}"
+```
+
+Back to [Summary_report.ml](https://github.com/returntocorp/semgrep/blob/d1103fe8aa9dfee140bb4214b3f9ebab1d2a4d4c/src/osemgrep/reporting/Summary_report.ml#L62). It seems that the output messages from this code is what is shown the in the terminal. Hence, changes should appear here.
+
+-----
+
+## Changes
+
+[Summary_report.ml](https://github.com/returntocorp/semgrep/blob/d1103fe8aa9dfee140bb4214b3f9ebab1d2a4d4c/src/osemgrep/reporting/Summary_report.ml#L62)
+
+```ocaml
+(* Code changes in Summary_report.ml*)
+(* Change the structure of output messages to consider file plurality *)
+| xs ->
+      let file_count = List.length xs in
+      let file_str = if file_count = 1 then "file" else "files" in
+      (* Notice spacing handled here already! *)
+      Some (string_of_int file_count ^ " " ^ file_str ^ " " ^ msg)
+
+(* ... *)
+
+let out_partial =
+    (* Remove preceding word "files" *)
+    opt_msg
+      "only partially analyzed due to a parsing or internal Semgrep error"
+      errors
+  in 
+  (* ... *)
+```
+
+```ocaml
+(* Tricky change, matter of wording. Original... *)
+(* 1 other files ignored *)
+(if legacy then None else opt_msg "other files ignored" other_ignored);
+
+(* Change *)
+(* 1 file also ignored but not already mentioned *)
+(if legacy then None else opt_msg "also ignored but not already mentioned" other_ignored);
+```
+
+See the [original code with notes](notes-original-Summary_report.ml) and [new code with the edits above](new.ml).
+
+----- 
+
+## Concerns
+
+1. Automatic scanning/parsing may break in some instances
+
+Users or particular features that scan for the phrase "files ... " in output messages may now fail in cases of an example output message such as "1 file ignored not matching --include patterns" as we now present both "file" and "files" as things to search for. However, given that the rest of the summary already had correct plurality, scanning code should have already been robust enough the handle the edge case of 1 file instances.
+
+2. Significant amounts of snapshots become out of date
+
+Search queries such as this one will reveal a large sample of snapshots:
+https://github.com/search?q=repo%3Areturntocorp%2Fsemgrep+Partially+scanned%3A&type=code
+
+This change may necessitate that these snapshots change given that the plurality of the word "files" is incorrect.
+
+-----
+
+### Next Steps
+I want to revisit the issues posted by other users in [Context](#context).
+
+### Links and Notes
+https://semgrep.dev/docs/contributing/contributing-code/
+https://semgrep.dev/docs/cli-reference/#exit-codes
+https://semgrep.dev/docs/contributing/semgrep-core-contributing/
+https://semgrep.dev/docs/contributing/semgrep-contributing/
+
+
+Exit Codes Match - semgrep-core
+- https://semgrep.dev/docs/cli-reference/#exit-codes
+- https://github.com/returntocorp/semgrep/blob/d1103fe8aa9dfee140bb4214b3f9ebab1d2a4d4c/src/osemgrep/core/Exit_code.ml#L4
+
+## Further Contributions
+Semgrep PR - Semgrep CI Command Run Error Behavior
+
+Two branches of notice on allandao/devops-course:
+- default branch 2023 - essay branch
+- madao - open source contribution branch
+
+Pull Request Template
+https://github.com/returntocorp/semgrep/blob/a2fba21f8fda9f24c9473640a2880c2ad607aeaa/.github/pull_request_template.md
+
+### CLI Investigation
+https://github.com/returntocorp/semgrep/blob/develop/cli/src/semgrep/commands/
+ci.py
+``` -- config ```
+https://github.com/returntocorp/semgrep/blob/34cd3b73e2d17ed5a312b7f524c084e333555193/src/osemgrep/cli_scan/Rule_fetching.ml
+https://github.com/returntocorp/semgrep/blob/fd5a9e9ec6754fc197e66d7a3e56c65fba83b8d8/cli/src/semgrep/config_resolver.py
+```ocaml
+| Error msg ->
+                   (* was raise Semgrep_error, but equivalent to abort now *)
+                   Error.abort
+                     (spf "Failed to download config from %s: %s"
+                        (Uri.to_string url) msg)
+```
+```py
+__main__.py > 
+from semgrep.cli import cli
+def main() -> int:
+    cli()  # thus we look into cli.lpy
+    return 0
+
+cli.py
+from semgrep.commands.ci import ci
+cli.add_command(ci)
+
+commands/ci.py 
+To run multiple rule files simultaneously, use --config before every YAML, URL, or Semgrep registry entry name. For example `semgrep --config p/python --config myrules/myrule.yaml`
+@click.option(
+    "--config",
+    "-c",
+    "-f",
+    multiple=True,
+    envvar="SEMGREP_RULES",
+Ideas: 
+- SEMGREP_RULES
+- @handle_command_errors
+def ci(
+configs=config
+autofix=scan_handler.autofix if scan_handler else False,
+
+except SemgrepError as e:
+        output_handler.handle_semgrep_errors([e])
+        output_handler.output({}, all_targets=set(), filtered_rules=[])
+        logger.info(f"Encountered error when running rules: {e}")
+        if isinstance(e, SemgrepError):
+            exit_code = e.code
+        else:
+            exit_code = FATAL_EXIT_CODE
+        if scan_handler:
+            scan_handler.report_failure(exit_code)
+        sys.exit(exit_code)
+```
+Flag --no-suppress-errors, a red herring:
+By default, Semgrep may suppress certain types of errors to avoid overwhelming the user with excessive output. For verbose output, not for program stalling.
+
+Semgrep_error vs Error.Abort
+
+### Understanding the Issue
+
+#### Command Permutations - all exit code 0 despite failure
+Show error output in terminal
+```
+semgrep ci --config="p/default" --config=" p/javascript" --sarif --output="output.sarif" --metrics off --force-color 
+semgrep --config=" p/auto" "test.js"
+semgrep ci --config p/default
+semgrep ci --config "p/default"
+semgrep ci --config="p/default"
+```
+Send error output to file
+```
+semgrep ci --config="p/default" --config=" p/python"  --sarif --output="output.sarif" --metrics off --force-color
+semgrep ci --config="p/default, p/python"  --sarif --output="output.sarif" --metrics off --force-color 
+semgrep ci --config="p/default" "p/python"  --sarif --output="output.sarif" --metrics off --force-color
+semgrep ci --config="p/default p/python"  --sarif --output="output.sarif" --metrics off --force-color
+```
+-----
+
+Error Message Appears
+```
+Any of these permutations:
+semgrep ci --config="p/default" --config=" p/javascript"
+semgrep ci --force-color --config="p/default"  --config=" p/javascript"
+semgrep ci --force-color --metrics off --config="p/default"  --config=" p/javascript"
+semgrep ci --config="p/default"  --config=" p/javascript" --force-color --metrics off
+
+  SCAN ENVIRONMENT
+  versions    - semgrep 1.22.0 on python 3.8.10                        
+  environment - running in environment git, triggering event is unknown
+[ERROR] WARNING: unable to find a config; path ` p/javascript` does not exist
+[ERROR] invalid configuration file found (1 configs were invalid)
+```
+
+Better understanding of the issue - the error is in the exit code returned, not that there is no error output. It is correctly sent to file output (rather than error message in the terminal) with the flags given by the issue proposer.
+```
+echo $? 
+returns 7 for semgrep --config=" p/auto" "test.js"
+returns 0 for all semgrep ci runs
+```
+#### Next Steps
+- Requires investigation into semgrep CI
+- Error code returns are in semgrep-core, not Python wrapper
+
